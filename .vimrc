@@ -44,6 +44,8 @@ Plug 'ryanoasis/vim-devicons'
 
 "" Finder
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'yuki-yano/fzf-preview.vim', { 'branch': 'release/rpc' }
 
 "" Terminal
 Plug 'voldikss/vim-floaterm'
@@ -348,6 +350,9 @@ let g:indentLine_setColors = 0
 let g:indentLine_char_list = ['¦', '┆', '┊']
 let g:indentLine_fileTypeExclude = ['markdown']
 
+" vim-startify
+let g:startify_change_to_dir = 0
+
 " NERD Tree
 " Change default window size
 let g:NERDTreeWinSize=40
@@ -417,18 +422,51 @@ let g:lightline = {
             \ },
             \ }
 
-" fzf
-map <C-p> :<C-u>FZF<CR>
-map <C-b> :<C-u>Buffers<CR>
-map <C-h> :<C-u>History:<CR>
 
-let g:fzf_colors =
-            \ { 'fg':    ['fg', 'Normal'],
-            \ 'bg':      ['bg', 'Normal'],
-            \ 'hl':      ['fg', 'Statement'],
-            \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-            \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-            \ 'hl+':     ['fg', 'Statement'] }
+"" fzf
+" shortcuts
+nmap <Leader>f [fzf-p]
+xmap <Leader>f [fzf-p]
+
+nnoremap <silent> <C-p>     :<C-u>FzfPreviewProjectFilesRpc project_mru<CR>
+
+nnoremap <silent> [fzf-p]p     :<C-u>FzfPreviewFromResourcesRpc project_mru git<CR>
+nnoremap <silent> [fzf-p]gs    :<C-u>FzfPreviewGitStatusRpc<CR>
+nnoremap <silent> [fzf-p]ga    :<C-u>FzfPreviewGitActionsRpc<CR>
+nnoremap <silent> [fzf-p]b     :<C-u>FzfPreviewBuffersRpc<CR>
+nnoremap <silent> [fzf-p]B     :<C-u>FzfPreviewAllBuffersRpc<CR>
+nnoremap <silent> [fzf-p]o     :<C-u>FzfPreviewFromResourcesRpc buffer project_mru<CR>
+nnoremap <silent> [fzf-p]<C-o> :<C-u>FzfPreviewJumpsRpc<CR>
+nnoremap <silent> [fzf-p]g;    :<C-u>FzfPreviewChangesRpc<CR>
+nnoremap <silent> [fzf-p]/     :<C-u>FzfPreviewLinesRpc --add-fzf-arg=--no-sort --add-fzf-arg=--query="'"<CR>
+nnoremap <silent> [fzf-p]*     :<C-u>FzfPreviewLinesRpc --add-fzf-arg=--no-sort --add-fzf-arg=--query="'<C-r>=expand('<cword>')<CR>"<CR>
+nnoremap          [fzf-p]gr    :<C-u>FzfPreviewProjectGrepRpc<Space>
+xnoremap          [fzf-p]gr    "sy:FzfPreviewProjectGrepRpc<Space>-F<Space>"<C-r>=substitute(substitute(@s, '\n', '', 'g'), '/', '\\/', 'g')<CR>"
+nnoremap <silent> [fzf-p]t     :<C-u>FzfPreviewBufferTagsRpc<CR>
+nnoremap <silent> [fzf-p]q     :<C-u>FzfPreviewQuickFixRpc<CR>
+nnoremap <silent> [fzf-p]l     :<C-u>FzfPreviewLocationListRpc<CR>
+
+" settings
+let g:fzf_preview_command = 'bat --color=always --plain {-1}' " Installed bat
+
+augroup fzf_preview
+  autocmd!
+  autocmd User fzf_preview#rpc#initialized call s:fzf_preview_settings() " fzf_preview#remote#initialized or fzf_preview#coc#initialized
+augroup END
+
+function! s:fzf_preview_settings() abort
+  let g:fzf_preview_command = 'COLORTERM=truecolor ' . g:fzf_preview_command
+  let g:fzf_preview_grep_preview_cmd = 'COLORTERM=truecolor ' . g:fzf_preview_grep_preview_cmd
+endfunction
+
+" let g:fzf_colors =
+"             \ { 'fg':    ['fg', 'Normal'],
+"             \ 'bg':      ['bg', 'Normal'],
+"             \ 'hl':      ['fg', 'Statement'],
+"             \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+"             \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+"             \ 'hl+':     ['fg', 'Statement'] }
+
 
 " easy align
 " Start interactive EasyAlign in visual mode (e.g. vipga)
